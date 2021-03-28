@@ -4,44 +4,23 @@ const app = express();
 const flips = require("./data/flips-data");
 const counts = require("./data/counts-data");
 
-let lastFlipId = flips.reduce(
-  (maxId, flipObj) => Math.max(maxId, flipObj.id),
-  0
-);
+const flipsRouter = require('./flips/flips.router');
+
+
+
 
 app.use(express.json());
 
-// New middleware function to validate the request body
-function bodyHasResultProperty(req, res, next) {
-  const { data: { result } = {} } = req.body;
-  if (result) {
-    return next(); // Call `next()` without an error message if the result exists
-  }
-  next({
-    status: 400,
-    message: "A 'result' property is required.",
-  });
-}
+
 
 // TODO: Follow instructions in the checkpoint to implement ths API.
 app.use("/counts", (req, res, next) => {
   res.json({ data: counts });
 });
 
-app.get("/flips", (req, res, next) => {
-  res.json({ data: flips });
-});
+app.use("/flips", flipsRouter);
 
-app.post("/flips", bodyHasResultProperty, (req, res) => {
-  // Route handler no longer has validation code.
-  const { data: { result } = {} } = req.body;
-  const newFlip = {
-    id: ++lastFlipId, // Increment last id then assign as the current ID
-    result: result,
-  };
-  flips.push(newFlip);
-  res.status(201).json({ data: newFlip });
-});
+
 
 app.get("/flips/:id", (req, res, next) => {
   const { id } = req.params;
