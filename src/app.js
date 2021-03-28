@@ -32,16 +32,14 @@ app.get("/flips", (req, res, next) => {
   res.json({ data: flips });
 });
 
-app.post("/flips", bodyHasResultProperty, (req, res, next) => {
+app.post("/flips", bodyHasResultProperty, (req, res) => {
+  // Route handler no longer has validation code.
   const { data: { result } = {} } = req.body;
-
   const newFlip = {
     id: ++lastFlipId, // Increment last id then assign as the current ID
-    result,
+    result: result,
   };
-
   flips.push(newFlip);
-  counts[result] = counts[result] + 1; // Increment the counts
   res.status(201).json({ data: newFlip });
 });
 
