@@ -1,4 +1,5 @@
 const flips = require("../data/flips-data");
+const counts = require("../data/counts-data");
 
 // Helper functions and data --------------------------------------------------
 
@@ -34,23 +35,66 @@ const resultPropertyisValid = (req, res, next) => {
   }
 };
 
+const specifiedFlipExists = (req, res, next) => {
+  const { id } = req.params;
+  const flip = flips.find((flip) => flip.id === +id);
+
+  if (flip) {
+    return next();
+  } else {
+    next({
+      status: 404,
+      message: `Flip id not found: ${id}`,
+    });
+  }
+}
+
 // Route handler functions ----------------------------------------------------
 
-const create = (req, res) => {
+// POST "/flips"
+function create(req, res) {
   const { data: { result } = {} } = req.body;
   const newFlip = {
     id: ++lastFlipId, // Increment last id then assign as the current ID
-    result: result,
+    result,
   };
   flips.push(newFlip);
+  counts[result] = counts[result] + 1;
   res.status(201).json({ data: newFlip });
-};
+}
 
+// GET "/flips"
 const list = (req, res) => {
   res.json({ data: flips });
 };
 
+// GET "/flips/:id"
+const read = (req, res) => {
+  const { id } = req.params;
+  const flip = flips.find((flip) => flip.id === +id);
+  res.json({ data: flip });
+}
+
+// PUT "/flips/:id"
+const update = (req, res) => {
+  const { id } = req.params;
+  const foundFlip = flips.find((flip) => flip.id === +id);
+
+  const originalResult = foundFlip.result;
+  const { data: { result } = {} } = req.body;
+
+  if (originalResult !== result) {
+    foundFlip.result = result;
+    counts[originalResult] = counts[originalResult] - 1;
+    counts[result] = counts[result] + 1;
+  }
+
+  res.json({ data: foundFlip });
+}
+
 module.exports = {
   list,
   create: [bodyHasResultProperty, resultPropertyisValid, create],
+  read: [specifiedFlipExists, read],
+  update: [specifiedFlipExists, bodyHasResultProperty, resultPropertyisValid, update]
 };

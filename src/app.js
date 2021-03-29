@@ -6,12 +6,7 @@ const counts = require("./data/counts-data");
 
 const flipsRouter = require('./flips/flips.router');
 
-
-
-
 app.use(express.json());
-
-
 
 // TODO: Follow instructions in the checkpoint to implement ths API.
 app.use("/counts", (req, res, next) => {
@@ -19,22 +14,6 @@ app.use("/counts", (req, res, next) => {
 });
 
 app.use("/flips", flipsRouter);
-
-
-
-app.get("/flips/:id", (req, res, next) => {
-  const { id } = req.params;
-  const flip = flips.find((flip) => flip.id === +id);
-
-  if (flip) {
-    res.json({ data: flip });
-  } else {
-    next({
-      status: 404,
-      message: `Flip id not found: ${id}`,
-    });
-  }
-});
 
 app.use("/:countId", (req, res, next) => {
   const { countId } = req.params;
