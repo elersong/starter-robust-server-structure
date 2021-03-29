@@ -92,9 +92,21 @@ const update = (req, res) => {
   res.json({ data: foundFlip });
 }
 
+// DELETE "/flips/:id"
+const destroy = (req, res) => {
+  const { id } = req.params;
+  const index = flips.findIndex(flip => flip.id === +id);
+
+  const deletedFlips = flips.splice(index, 1);
+  deletedFlips.forEach(deletedFlip => counts[deletedFlip.result] = counts[deletedFlip.result] - 1)
+
+  res.sendStatus(204);
+}
+
 module.exports = {
   list,
   create: [bodyHasResultProperty, resultPropertyisValid, create],
   read: [specifiedFlipExists, read],
-  update: [specifiedFlipExists, bodyHasResultProperty, resultPropertyisValid, update]
+  update: [specifiedFlipExists, bodyHasResultProperty, resultPropertyisValid, update],
+  delete: [specifiedFlipExists, destroy],
 };
